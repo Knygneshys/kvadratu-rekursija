@@ -11,7 +11,8 @@ namespace Kvadratu_rekursija
             {
 
                 // Define BMP header (with correct file size)
-                int width = 5000, height = 5000;
+                int size = 10000;
+                int width = size, height = size;
 
 
                 int rowSize = (width + 31) / 32 * 4; // Ensure row size is multiple of 4 bytes
@@ -44,28 +45,36 @@ namespace Kvadratu_rekursija
 
 
                         // Color table (can be changed to black and white)
-                        0x0, 0x0, 0x0, 0x0,
-                        0xff, 0xff, 0xff, 0x0
+
+                        // juoda ant balto
+                        0xff, 0xff, 0xff, 0x0,
+                        0x0, 0x0, 0x0, 0x0
+                        
+
+                        // balta ant juodo
+                        //0x0, 0x0, 0x0, 0x0,
+                        //0xff, 0xff, 0xff, 0x0
                     }
                  );
 
                 // Calculate the number of bytes in a BMP image row (multiple of 4): 1000 bits / 32 bits = 31.25, 
                 // so in this case the row will require 32 bytes of 4
-                int l = (width + 31) / 32 * 4;
+                int l = (size + 31) / 32 * 4;
                 //Console.WriteLine(l);
 
                 // Define the array for the pixels. The color of the first pixel in the array corresponds to the value of the first bit.
                 var t = new byte[height * l];
 
-                DrawSquare(0, 0, width, l, t, 3);
+                DrawSquare(0, 0, size, l, t, 3);
 
                 file.Write(t);
                 file.Close();
             }
         }
 
-        // TODO paklausti ar image size visada bus kvadratas ar gali būti ir stačiakampis
+        // TODO panaikinti mazus tarpelius tarp horizontaliu ir verikaliu liniju
         // TODO perdaryti ciklus i rekursija
+  
         static void DrawSquare(int startPosX, int startPosY, int size, int l, byte[] t, int depth)
         {
             if (depth == 0)
@@ -74,23 +83,32 @@ namespace Kvadratu_rekursija
             int offset = size / 3;
 
             // Nupiesia vertikalias linijas
-            for (int i = startPosY; i < size + startPosY; i++)
-            {
-                t[i * l + (offset + startPosX) / 8] = 0b10000000;
-                t[i * l + (offset * 2 + startPosX) / 8] = 0b10000000;
-            }
+
+            DrawVerticalLines(startPosY, startPosY, startPosX, offset, l, size, t);
+
+            //for (int i = startPosY; i < size + startPosY; i++)
+            //{
+            //    t[i * l + (offset + startPosX) / 8] = 0b10000000;
+            //    t[i * l + (offset * 2 + startPosX) / 8] = 0b10000000;
+            //}
 
             // Nupiesia horizontalias linijas
-            for (int i = startPosX / 8; i < (size + startPosX) / 8; i++)
-            {
-                t[(startPosY + offset) * l + i] = 0b11111111;
-                t[(startPosY + offset * 2) * l + i] = 0b11111111;
-            }
+
+            DrawHorizontalLines(startPosX / 8, startPosY, startPosX, offset, l, size, t);
+
+            //for (int i = startPosX / 8; i < (size + startPosX) / 8; i++)
+            //{
+            //    t[(startPosY + offset) * l + i] = 0b11111111;
+            //    t[(startPosY + offset * 2) * l + i] = 0b11111111;
+            //}
 
             // Uzpildo vidurini kvadrata
-            for(int y = startPosY + offset; y < startPosY + offset * 2; y++)
-                for(int x = (startPosX + offset) / 8; x < (startPosX + offset * 2)/ 8; x++)
-                    t[y * l + x] = 0b11111111;
+
+            DrawSquareFirstCycle(startPosY + offset, startPosY, startPosX, offset, l, size, t);
+
+            //for(int y = startPosY + offset; y < startPosY + offset * 2; y++)
+            //    for(int x = (startPosX + offset) / 8; x < (startPosX + offset * 2)/ 8; x++)
+            //        t[y * l + x] = 0b11111111;
 
             
             DrawSquare(startPosX, startPosY, size / 3, l, t, depth - 1); // bottom left
@@ -102,5 +120,51 @@ namespace Kvadratu_rekursija
             DrawSquare(startPosX + offset, startPosY + offset * 2, offset, l, t, depth - 1); // top middle
             DrawSquare(startPosX + offset * 2, startPosY + offset * 2, offset, l, t, depth - 1); // top right
         }
+
+        static void DrawVerticalLines(int i, int startPosY, int startPosX, int offset, int l, int size, byte[] t)
+        {
+            if (i >= size + startPosY)
+                return;
+
+            t[i * l + (offset + startPosX) / 8] = 0b10000000;
+            t[i * l + (offset * 2 + startPosX) / 8] = 0b10000000;
+
+            DrawVerticalLines(++i, startPosY, startPosX, offset, l, size, t);
+        }
+        
+        static void DrawHorizontalLines(int i, int startPosY, int startPosX, int offset, int l, int size, byte[] t)
+        {
+            if (i >= (size + startPosX) / 8)
+                return;
+
+            t[(startPosY + offset) * l + i] = 0b11111111;
+            t[(startPosY + offset * 2) * l + i] = 0b11111111;
+
+            DrawHorizontalLines(++i, startPosY, startPosX, offset, l, size, t);
+        }
+
+
+        static void DrawSquareFirstCycle(int y, int startPosY, int startPosX, int offset, int l, int size, byte[] t)
+        {
+            if (y >= startPosY + offset * 2)
+                return;
+
+            DrawSquareSecondCycle(y, (startPosX + offset) / 8, startPosY, startPosX, offset, l, size, t);
+
+            DrawSquareFirstCycle(++y, startPosY, startPosX, offset, l, size, t);
+        }
+
+        static void DrawSquareSecondCycle(int y, int x, int startPosY, int startPosX, int offset, int l, int size, byte[] t)
+        {
+            if (x >= (startPosX + offset * 2) / 8)
+                return;
+
+            t[y * l + x] = 0b11111111;
+
+            DrawSquareSecondCycle(y, ++x, startPosY, startPosX, offset, l, size, t);
+        }
+
+        // nuo pav dydzio ziureti laika ir ivykdytas kodo eilutes (su globaliu kintamuoju apsiskaiciuoti) taip pat ir su gyliu.
+        // liūte neliūdėk
     }
 }
