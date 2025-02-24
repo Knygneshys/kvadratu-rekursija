@@ -1,17 +1,18 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace Kvadratu_rekursija
 {
     class Program
     {
+        static int counter = 0;
         static void Main(string[] args)
         {
             using (FileStream file = new FileStream("sample.bmp", FileMode.Create, FileAccess.Write))
             {
-
                 // Define BMP header (with correct file size)
-                int size = 10000;
+                int size = 5000;
                 int width = size, height = size;
 
 
@@ -60,13 +61,17 @@ namespace Kvadratu_rekursija
                 // Calculate the number of bytes in a BMP image row (multiple of 4): 1000 bits / 32 bits = 31.25, 
                 // so in this case the row will require 32 bytes of 4
                 int l = (size + 31) / 32 * 4;
-                //Console.WriteLine(l);
 
                 // Define the array for the pixels. The color of the first pixel in the array corresponds to the value of the first bit.
                 var t = new byte[height * l];
-
-                DrawSquare(0, 0, size, l, t, 6);
-
+                Stopwatch timer = new Stopwatch();
+                timer.Start();
+                DrawSquare(0, 0, size, l, t, 3);
+                timer.Stop();
+                
+                Console.WriteLine("Veiksmų sk.: " + counter);
+                Console.WriteLine("Laikas ms.: " + timer.ElapsedMilliseconds);
+                
                 file.Write(t);
                 file.Close();
             }
@@ -74,13 +79,20 @@ namespace Kvadratu_rekursija
         
         static void DrawSquare(int startPosX, int startPosY, int size, int l, byte[] t, int depth)
         {
+            counter++;
             if (depth == 0)
+            {
+                counter++;
                 return;
+            }
 
+            counter++;
             int offset = size / 3;
 
             // Nupiesia vertikalias linijas
 
+            counter += 3;
+            
             DrawVerticalLines(startPosY, startPosY, startPosX, offset, l, size, t);
 
             // Nupiesia horizontalias linijas
@@ -90,7 +102,8 @@ namespace Kvadratu_rekursija
             // Uzpildo vidurini kvadrata
 
             DrawSquareFirstCycle(startPosY + offset, startPosY, startPosX, offset, l, size, t);
-            
+
+            counter += 8;
             DrawSquare(startPosX, startPosY, size / 3, l, t, depth - 1); // bottom left
             DrawSquare(startPosX + offset, startPosY, offset, l, t, depth - 1); // bottom middle
             DrawSquare(startPosX + offset * 2, startPosY, offset, l, t, depth - 1); // bottom right
@@ -103,9 +116,14 @@ namespace Kvadratu_rekursija
 
         static void DrawVerticalLines(int i, int startPosY, int startPosX, int offset, int l, int size, byte[] t)
         {
+            counter++;
             if (i >= size + startPosY)
+            {
+                counter++;
                 return;
+            }
 
+            counter += 3;
             t[i * l + (offset + startPosX) / 8] = 0b10000000;
             t[i * l + (offset * 2 + startPosX) / 8] = 0b10000000;
 
@@ -114,9 +132,14 @@ namespace Kvadratu_rekursija
         
         static void DrawHorizontalLines(int i, int startPosY, int startPosX, int offset, int l, int size, byte[] t)
         {
+            counter++;
             if (i >= (size + startPosX) / 8)
+            {
+                counter++;
                 return;
+            }
 
+            counter += 3;
             t[(startPosY + offset) * l + i] = 0b11111111;
             t[(startPosY + offset * 2) * l + i] = 0b11111111;
 
@@ -126,9 +149,14 @@ namespace Kvadratu_rekursija
 
         static void DrawSquareFirstCycle(int y, int startPosY, int startPosX, int offset, int l, int size, byte[] t)
         {
+            counter++;
             if (y >= startPosY + offset * 2)
+            {
+                counter++;
                 return;
+            }
 
+            counter += 2;
             DrawSquareSecondCycle(y, (startPosX + offset) / 8, startPosY, startPosX, offset, l, size, t);
 
             DrawSquareFirstCycle(++y, startPosY, startPosX, offset, l, size, t);
@@ -136,9 +164,14 @@ namespace Kvadratu_rekursija
 
         static void DrawSquareSecondCycle(int y, int x, int startPosY, int startPosX, int offset, int l, int size, byte[] t)
         {
+            counter++;
             if (x >= (startPosX + offset * 2) / 8)
+            {
+                counter++;
                 return;
+            }
 
+            counter += 2;
             t[y * l + x] = 0b11111111;
 
             DrawSquareSecondCycle(y, ++x, startPosY, startPosX, offset, l, size, t);
