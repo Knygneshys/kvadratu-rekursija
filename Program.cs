@@ -85,7 +85,6 @@ namespace Kvadratu_rekursija
             {
                 counter++;
                 depth = (int)Math.Floor(Math.Log(size, 4));
-                Console.WriteLine(depth);
             }
             
             DrawSquare(0, 0, size, l, t, depth); 
@@ -93,15 +92,21 @@ namespace Kvadratu_rekursija
 
         static void DrawOutline(int size, int l, byte[] t)
         {
+            counter += 2;
             DrawHorizontalBorders(0, size, l, t);
             DrawVerticalBorders(0, size, l, t);
         }
 
         static void DrawHorizontalBorders(int i, int size, int l, byte[] t)
         {
-            if (i >= l) 
+            counter++;
+            if (i >= l)
+            {
+                counter++;
                 return;
-    
+            }
+
+            counter += 3;
             // Top border
             t[i] = 0b11111111;
             // Bottom border
@@ -112,15 +117,19 @@ namespace Kvadratu_rekursija
 
         static void DrawVerticalBorders(int i, int size, int l, byte[] t)
         {
-            if (i >= size) 
+            counter++;
+            if (i >= size)
+            {
+                counter++;
                 return;
-    
+            }
+
+            counter += 3;
             // Left border
             t[l * i] |= 0b10000000;
             // Right border
             t[l * i + ((size - 1) / 8)] |= (byte)(0b10000000 >> ((size - 1) % 8));
-
-    
+            
             DrawVerticalBorders(i + 1, size, l, t);
         }
         
@@ -147,8 +156,7 @@ namespace Kvadratu_rekursija
             DrawHorizontalLines(startPosX / 8, startPosY, startPosX, offset, l, size, t);
             
             // Uzpildo vidurini kvadrata
-
-
+            
             
             DrawSquareFirstCycle(startPosY + offset, startPosY, startPosX, offset, l, size, t);
 
@@ -185,15 +193,15 @@ namespace Kvadratu_rekursija
             counter++;
             if (i >= (size + startPosX) / 8)
             {
-                counter++;
+                counter += 3;
                 // Draw final pixels to connect the lines
-                t[(startPosY + offset) * l + ((size + startPosX) / 8) ] = 0b11111111;
-                t[(startPosY + offset * 2) * l + ((size + startPosX) / 8) ] = 0b11111111;
+                t[(startPosY + offset) * l + (size + startPosX) / 8 ] = 0b11111111;
+                t[(startPosY + offset * 2) * l + (size + startPosX) / 8 ] = 0b11111111;
                 return;
             }
 
             counter += 3;
-            // Use OR operation to ensure we don't overwrite existing pixels
+            // Use OR operation to ensure that existing pixels are not overwritten
             t[(startPosY + offset) * l + i] = 0b11111111;
             t[(startPosY + offset * 2) * l + i] = 0b11111111;
 
