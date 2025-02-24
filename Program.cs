@@ -65,16 +65,13 @@ namespace Kvadratu_rekursija
                 // Define the array for the pixels. The color of the first pixel in the array corresponds to the value of the first bit.
                 var t = new byte[height * l];
 
-                DrawSquare(0, 0, size, l, t, 3);
+                DrawSquare(0, 0, size, l, t, 6);
 
                 file.Write(t);
                 file.Close();
             }
         }
-
-        // TODO panaikinti mazus tarpelius tarp horizontaliu ir verikaliu liniju
-        // TODO perdaryti ciklus i rekursija
-  
+        
         static void DrawSquare(int startPosX, int startPosY, int size, int l, byte[] t, int depth)
         {
             if (depth == 0)
@@ -86,30 +83,13 @@ namespace Kvadratu_rekursija
 
             DrawVerticalLines(startPosY, startPosY, startPosX, offset, l, size, t);
 
-            //for (int i = startPosY; i < size + startPosY; i++)
-            //{
-            //    t[i * l + (offset + startPosX) / 8] = 0b10000000;
-            //    t[i * l + (offset * 2 + startPosX) / 8] = 0b10000000;
-            //}
-
             // Nupiesia horizontalias linijas
 
             DrawHorizontalLines(startPosX / 8, startPosY, startPosX, offset, l, size, t);
-
-            //for (int i = startPosX / 8; i < (size + startPosX) / 8; i++)
-            //{
-            //    t[(startPosY + offset) * l + i] = 0b11111111;
-            //    t[(startPosY + offset * 2) * l + i] = 0b11111111;
-            //}
-
+            
             // Uzpildo vidurini kvadrata
 
             DrawSquareFirstCycle(startPosY + offset, startPosY, startPosX, offset, l, size, t);
-
-            //for(int y = startPosY + offset; y < startPosY + offset * 2; y++)
-            //    for(int x = (startPosX + offset) / 8; x < (startPosX + offset * 2)/ 8; x++)
-            //        t[y * l + x] = 0b11111111;
-
             
             DrawSquare(startPosX, startPosY, size / 3, l, t, depth - 1); // bottom left
             DrawSquare(startPosX + offset, startPosY, offset, l, t, depth - 1); // bottom middle
