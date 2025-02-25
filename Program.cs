@@ -66,11 +66,11 @@ namespace Kvadratu_rekursija
                 var t = new byte[height * l];
                 Stopwatch timer = new Stopwatch();
                 timer.Start();
-                BeginDrawing(size, l, t, -1);
+                BeginDrawing(size, l, t, 3);
                 timer.Stop();
                 
                 Console.WriteLine("Veiksmų sk.: " + counter);
-                Console.WriteLine("Laikas ms.: " + timer.ElapsedMilliseconds);  
+                Console.WriteLine("Laikas ms.: " + timer.Elapsed);  
                 
                 file.Write(t);
                 file.Close();
@@ -80,13 +80,8 @@ namespace Kvadratu_rekursija
         static void BeginDrawing(int size, int l, byte[] t, int depth)
         {
             counter += 2;
-            DrawOutline(size, l, t);
-            if (depth == -1)
-            {
-                counter++;
-                depth = (int)Math.Floor(Math.Log(size, 4));
-            }
             
+            DrawOutline(size, l, t);
             DrawSquare(0, 0, size, l, t, depth); 
         }
 
