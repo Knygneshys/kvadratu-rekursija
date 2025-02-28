@@ -12,7 +12,7 @@ namespace Kvadratu_rekursija
             using (FileStream file = new FileStream("sample.bmp", FileMode.Create, FileAccess.Write))
             {
                 // Define BMP header (with correct file size)
-                int size = 1000;
+                int size = 6016;
                 int width = size, height = size;
 
 
@@ -70,7 +70,7 @@ namespace Kvadratu_rekursija
                 timer.Stop();
                 
                 Console.WriteLine("Veiksmų sk.: " + counter);
-                Console.WriteLine("Laikas ms.: " + timer.Elapsed);  
+                Console.WriteLine("Laikas: " + timer.Elapsed);  
                 
                 file.Write(t);
                 file.Close();
@@ -83,6 +83,11 @@ namespace Kvadratu_rekursija
             
             DrawOutline(size, l, t);
             DrawSquare(0, 0, size, l, t, depth); 
+        }
+
+        static int CalculateMaxDepth(int size, int depth)
+        {
+            return (size < 3) ? depth : CalculateMaxDepth(size / 3, depth + 1);
         }
 
         static void DrawOutline(int size, int l, byte[] t)
