@@ -12,7 +12,7 @@ namespace Kvadratu_rekursija
             using (FileStream file = new FileStream("sample.bmp", FileMode.Create, FileAccess.Write))
             {
                 // Define BMP header (with correct file size)
-                int size = 6016;
+                int size = 20000;
                 int width = size, height = size;
 
 
@@ -65,8 +65,11 @@ namespace Kvadratu_rekursija
                 // Define the array for the pixels. The color of the first pixel in the array corresponds to the value of the first bit.
                 var t = new byte[height * l];
                 Stopwatch timer = new Stopwatch();
+                int stackSize = 1073741824;
+                Thread thread = new Thread(() => BeginDrawing(size, l, t, -1), stackSize);
                 timer.Start();
-                BeginDrawing(size, l, t, 3);
+                thread.Start();
+                thread.Join();
                 timer.Stop();
                 
                 Console.WriteLine("Veiksmų sk.: " + counter);
@@ -80,14 +83,20 @@ namespace Kvadratu_rekursija
         static void BeginDrawing(int size, int l, byte[] t, int depth)
         {
             counter += 2;
-            
             DrawOutline(size, l, t);
+            if (depth == -1)
+            {
+                counter++;
+                depth = CalculateMaxDepth(size);
+            }
+
+            counter++;
             DrawSquare(0, 0, size, l, t, depth); 
         }
 
-        static int CalculateMaxDepth(int size, int depth)
+        static int CalculateMaxDepth(int size)
         {
-            return (size < 3) ? depth : CalculateMaxDepth(size / 3, depth + 1);
+            return (int)Math.Floor(Math.Log(size, 4));
         }
 
         static void DrawOutline(int size, int l, byte[] t)
