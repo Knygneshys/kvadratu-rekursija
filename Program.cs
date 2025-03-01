@@ -96,6 +96,7 @@ namespace Kvadratu_rekursija
 
         static int CalculateMaxDepth(int size)
         {
+            counter++;
             return (int)Math.Floor(Math.Log(size, 4));
         }
 
