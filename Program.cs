@@ -12,7 +12,7 @@ namespace Kvadratu_rekursija
             using (FileStream file = new FileStream("sample.bmp", FileMode.Create, FileAccess.Write))
             {
                 // Define BMP header (with correct file size)
-                int size = 5000;
+                int size = 20000;
                 int width = size, height = size;
 
 
@@ -48,13 +48,13 @@ namespace Kvadratu_rekursija
                         // Color table (can be changed to black and white)
 
                         // juoda ant balto
-                        0xff, 0xff, 0xff, 0x0,
-                        0x0, 0x0, 0x0, 0x0
+                        // 0xff, 0xff, 0xff, 0x0,
+                        // 0x0, 0x0, 0x0, 0x0
                         
 
                         // balta ant juodo
-                        //0x0, 0x0, 0x0, 0x0,
-                        //0xff, 0xff, 0xff, 0x0
+                        0x0, 0x0, 0x0, 0x0,
+                        0xff, 0xff, 0xff, 0x0
                     }
                  );
 
@@ -65,16 +65,81 @@ namespace Kvadratu_rekursija
                 // Define the array for the pixels. The color of the first pixel in the array corresponds to the value of the first bit.
                 var t = new byte[height * l];
                 Stopwatch timer = new Stopwatch();
+                int stackSize = 1073741824;
+                Thread thread = new Thread(() => BeginDrawing(size, l, t, -1), stackSize);
                 timer.Start();
-                DrawSquare(0, 0, size, l, t, 3);
+                thread.Start();
+                thread.Join();
                 timer.Stop();
                 
                 Console.WriteLine("Veiksmų sk.: " + counter);
-                Console.WriteLine("Laikas ms.: " + timer.ElapsedMilliseconds);
+                Console.WriteLine("Laikas: " + timer.Elapsed);  
                 
                 file.Write(t);
                 file.Close();
             }
+        }
+
+        static void BeginDrawing(int size, int l, byte[] t, int depth)
+        {
+            counter += 2;
+            DrawOutline(size, l, t);
+            if (depth == -1)
+            {
+                counter++;
+                depth = CalculateMaxDepth(size);
+            }
+
+            counter++;
+            DrawSquare(0, 0, size, l, t, depth); 
+        }
+
+        static int CalculateMaxDepth(int size)
+        {
+            return (int)Math.Floor(Math.Log(size, 4));
+        }
+
+        static void DrawOutline(int size, int l, byte[] t)
+        {
+            counter += 2;
+            DrawHorizontalBorders(0, size, l, t);
+            DrawVerticalBorders(0, size, l, t);
+        }
+
+        static void DrawHorizontalBorders(int i, int size, int l, byte[] t)
+        {
+            counter++;
+            if (i >= l)
+            {
+                counter++;
+                return;
+            }
+
+            counter += 3;
+            // Top border
+            t[i] = 0b11111111;
+            // Bottom border
+            t[l * (size - 1) + i] = 0b11111111;
+    
+            DrawHorizontalBorders(i + 1, size, l, t);
+        }
+
+        static void DrawVerticalBorders(int i, int size, int l, byte[] t)
+        {
+            counter++;
+            if (i >= size)
+            {
+                counter++;
+                return;
+            }
+
+            counter += 3;
+            // Left border
+            t[l * i] |= 0b10000000;
+            // Right border
+            t[l * i + ((size - 1) / 8)] |= (byte)(0b10000000 >> ((size - 1) % 8));
+            
+            DrawVerticalBorders(i + 1, size, l, t);
         }
         
         static void DrawSquare(int startPosX, int startPosY, int size, int l, byte[] t, int depth)
@@ -96,11 +161,12 @@ namespace Kvadratu_rekursija
             DrawVerticalLines(startPosY, startPosY, startPosX, offset, l, size, t);
 
             // Nupiesia horizontalias linijas
-
+            
             DrawHorizontalLines(startPosX / 8, startPosY, startPosX, offset, l, size, t);
             
             // Uzpildo vidurini kvadrata
-
+            
+            
             DrawSquareFirstCycle(startPosY + offset, startPosY, startPosX, offset, l, size, t);
 
             counter += 8;
@@ -124,8 +190,9 @@ namespace Kvadratu_rekursija
             }
 
             counter += 3;
-            t[i * l + (offset + startPosX) / 8] = 0b10000000;
-            t[i * l + (offset * 2 + startPosX) / 8] = 0b10000000;
+            // Ensure continuous vertical lines by using appropriate bit masks
+            t[i * l + (offset + startPosX) / 8] |= 0b10000000;
+            t[i * l + (offset * 2 + startPosX) / 8] |= 0b10000000;
 
             DrawVerticalLines(++i, startPosY, startPosX, offset, l, size, t);
         }
@@ -135,11 +202,15 @@ namespace Kvadratu_rekursija
             counter++;
             if (i >= (size + startPosX) / 8)
             {
-                counter++;
+                counter += 3;
+                // Draw final pixels to connect the lines
+                t[(startPosY + offset) * l + (size + startPosX) / 8 ] = 0b11111111;
+                t[(startPosY + offset * 2) * l + (size + startPosX) / 8 ] = 0b11111111;
                 return;
             }
 
             counter += 3;
+            // Use OR operation to ensure that existing pixels are not overwritten
             t[(startPosY + offset) * l + i] = 0b11111111;
             t[(startPosY + offset * 2) * l + i] = 0b11111111;
 
