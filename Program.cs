@@ -65,7 +65,7 @@ namespace Kvadratu_rekursija
                 var t = new byte[height * l];
                 Stopwatch timer = new Stopwatch();
                 int stackSize = 1073741824;
-                Thread thread = new Thread(() => BeginDrawing(size, l, t), stackSize);
+                Thread thread = new Thread(() => BeginDrawingRec(size, l, t, 3), stackSize);
                 timer.Start();
                 thread.Start();
                 thread.Join();
@@ -165,14 +165,14 @@ namespace Kvadratu_rekursija
             DrawSquareFirstCycle(startPosY + offset * 2 - 1, startPosY, startPosX, offset, l, size, t);
 
             counter += 8;
-            DrawSquare(startPosX, startPosY, size / 3, l, t, depth - 1); // bottom left
-            DrawSquare(startPosX + offset, startPosY, offset, l, t, depth - 1); // bottom middle
-            DrawSquare(startPosX + offset * 2, startPosY, offset, l, t, depth - 1); // bottom right
-            DrawSquare(startPosX, startPosY + offset, offset, l, t, depth - 1); // middle left
-            DrawSquare(startPosX + offset * 2, startPosY + offset, offset, l, t, depth - 1); // middle right
-            DrawSquare(startPosX, startPosY + offset * 2, offset, l, t, depth - 1); // top left
-            DrawSquare(startPosX + offset, startPosY + offset * 2, offset, l, t, depth - 1); // top middle
-            DrawSquare(startPosX + offset * 2, startPosY + offset * 2, offset, l, t, depth - 1); // top right
+            DrawSquareRec(startPosX, startPosY, size / 3, l, t, depth - 1); // bottom left
+            DrawSquareRec(startPosX + offset, startPosY, offset, l, t, depth - 1); // bottom middle
+            DrawSquareRec(startPosX + offset * 2, startPosY, offset, l, t, depth - 1); // bottom right
+            DrawSquareRec(startPosX, startPosY + offset, offset, l, t, depth - 1); // middle left
+            DrawSquareRec(startPosX + offset * 2, startPosY + offset, offset, l, t, depth - 1); // middle right
+            DrawSquareRec(startPosX, startPosY + offset * 2, offset, l, t, depth - 1); // top left
+            DrawSquareRec(startPosX + offset, startPosY + offset * 2, offset, l, t, depth - 1); // top middle
+            DrawSquareRec(startPosX + offset * 2, startPosY + offset * 2, offset, l, t, depth - 1); // top right
         }
 
         static void DrawSquare(int startPosX, int startPosY, int size, int l, byte[] t, int minSize)
