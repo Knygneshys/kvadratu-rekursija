@@ -12,7 +12,7 @@ namespace Kvadratu_rekursija
             using (FileStream file = new FileStream("sample.bmp", FileMode.Create, FileAccess.Write))
             {
                 // Define BMP header (with correct file size)
-                int size = 7000;
+                int size = 1000;
                 int width = size, height = size;
 
                 int rowSize = (width + 31) / 32 * 4; // Ensure row size is multiple of 4 bytes
@@ -65,8 +65,8 @@ namespace Kvadratu_rekursija
                 var t = new byte[height * l];
                 Stopwatch timer = new Stopwatch();
                 int stackSize = 1073741824;
-                //Thread thread = new Thread(() => BeginDrawingRec(size, l, t, 3), stackSize);
-                Thread thread = new Thread(() => BeginDrawing(size, l, t), stackSize);
+                Thread thread = new Thread(() => BeginDrawingRec(size, l, t, 3), stackSize);
+                //Thread thread = new Thread(() => BeginDrawing(size, l, t), stackSize);
                 timer.Start();
                 thread.Start();
                 thread.Join();
@@ -179,7 +179,7 @@ namespace Kvadratu_rekursija
         static void DrawSquare(int startPosX, int startPosY, int size, int l, byte[] t, int minSize)
         {
             counter++;
-            if (size < minSize)
+            if (size <= minSize)
             {
                 counter++;
                 return;
@@ -200,7 +200,7 @@ namespace Kvadratu_rekursija
 
             // Uzpildo vidurini kvadrata
 
-            DrawSquareFirstCycle(startPosY + offset * 2 - 1, startPosY, startPosX, offset, l, size, t);
+            DrawSquareFirstCycle(startPosY + offset * 2, startPosY, startPosX, offset, l, size, t);
 
             counter += 8;
             DrawSquare(startPosX, startPosY, offset, l, t, minSize); // bottom left
@@ -216,7 +216,7 @@ namespace Kvadratu_rekursija
         static void DrawVerticalLines(int i, int startPosY, int startPosX, int offset, int l, int size, byte[] t)
         {
             counter++;
-            if (i < startPosY)
+            if (i <= startPosY)
             {
                 counter++;
                 return;
@@ -237,8 +237,8 @@ namespace Kvadratu_rekursija
             {
                 counter += 3;
                 // Draw final pixels to connect the lines
-                t[(startPosY + offset) * l + 0] = 0b11111111;
-                t[(startPosY + offset * 2) * l + 0] = 0b11111111;
+                t[(startPosY + offset) * l] = 0b11111111;
+                t[(startPosY + offset * 2) * l] = 0b11111111;
                 return;
             }
             counter += 3;
@@ -253,7 +253,7 @@ namespace Kvadratu_rekursija
         static void DrawSquareFirstCycle(int y, int startPosY, int startPosX, int offset, int l, int size, byte[] t)
         {
             counter++;
-            if (y < startPosY + offset)  // Stop when reaching the top boundary of the middle square
+            if (y <= startPosY + offset)  // Stop when reaching the top boundary of the middle square
             {
                 counter++;
                 return;
@@ -261,7 +261,7 @@ namespace Kvadratu_rekursija
 
             counter += 2;
 
-            DrawSquareSecondCycle(y,( (startPosX + offset * 2) / 8)-1, startPosY, startPosX, offset, l, size, t);
+            DrawSquareSecondCycle(y,((startPosX + offset * 2) / 8)  - 1, startPosY, startPosX, offset, l, size, t);
 
             DrawSquareFirstCycle(--y, startPosY, startPosX, offset, l, size, t);
         }
@@ -270,9 +270,10 @@ namespace Kvadratu_rekursija
         static void DrawSquareSecondCycle(int y, int x, int startPosY, int startPosX, int offset, int l, int size, byte[] t)
         {
             counter++;
-            if (x < (startPosX + offset) / 8)
+            if (x <= (startPosX + offset) / 8)
             {
                 counter++;
+                t[y * l + x] = 0b11111111;
                 return;
             }
 
