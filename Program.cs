@@ -12,7 +12,9 @@ namespace Kvadratu_rekursija
             using (FileStream file = new FileStream("sample.bmp", FileMode.Create, FileAccess.Write))
             {
                 // Define BMP header (with correct file size)
-                int size = 1000;
+                Console.WriteLine("Kokio dydžio paveikslėlio norite?");
+                
+                int size = int.Parse(Console.ReadLine());
                 int width = size, height = size;
 
                 int rowSize = (width + 31) / 32 * 4; // Ensure row size is multiple of 4 bytes
@@ -65,16 +67,25 @@ namespace Kvadratu_rekursija
                 var t = new byte[height * l];
                 Stopwatch timer = new Stopwatch();
                 int stackSize = 1073741824;
-                Thread thread = new Thread(() => BeginDrawingRec(size, l, t, 3), stackSize);
-                //Thread thread = new Thread(() => BeginDrawing(size, l, t), stackSize);
+                Console.WriteLine("Ar norite generavimo pagal rekursiją (1) ar matmenis (2)? Įrašykite atitinkamą skaičių");
+                string selection = Console.ReadLine();
+                Thread thread;
+                if (selection.Equals("1"))
+                {
+                    Console.WriteLine("Irasykite rekursijos gyli: ");
+                    thread = new Thread(() => BeginDrawingRec(size, l, t, int.Parse(Console.ReadLine())), stackSize);
+                }
+                else
+                    thread = new Thread(() => BeginDrawing(size, l, t), stackSize);
+
                 timer.Start();
                 thread.Start();
                 thread.Join();
                 timer.Stop();
-                
+
                 Console.WriteLine("Veiksmų sk.: " + counter);
-                Console.WriteLine("Laikas: " + timer.Elapsed);  
-                
+                Console.WriteLine("Laikas: " + timer.Elapsed);
+
                 file.Write(t);
                 file.Close();
             }
@@ -223,7 +234,7 @@ namespace Kvadratu_rekursija
             }
 
             counter += 3;
-            // Ensure continuous vertical lines by using appropriate bit masks
+            
             t[i * l + (offset + startPosX) / 8] |= 0b10000000;
             t[i * l + (offset * 2 + startPosX) / 8] |= 0b10000000;
 
@@ -236,24 +247,23 @@ namespace Kvadratu_rekursija
             if (i < startPosX / 8)
             {
                 counter += 3;
-                // Draw final pixels to connect the lines
+                // Sujungia linijas
                 t[(startPosY + offset) * l] = 0b11111111;
                 t[(startPosY + offset * 2) * l] = 0b11111111;
                 return;
             }
             counter += 3;
 
-            // Use OR operation to ensure that existing pixels are not overwritten
+            // Panaudoja ARBA operatorių, kad neužieštų jau esančių pikselių
             t[(startPosY + offset) * l + i] = 0b11111111;
             t[(startPosY + offset * 2) * l + i] = 0b11111111;
             DrawHorizontalLines(--i, startPosY, startPosX, offset, l, size, t);
         }
 
-
         static void DrawSquareFirstCycle(int y, int startPosY, int startPosX, int offset, int l, int size, byte[] t)
         {
             counter++;
-            if (y <= startPosY + offset)  // Stop when reaching the top boundary of the middle square
+            if (y <= startPosY + offset)
             {
                 counter++;
                 return;
@@ -265,7 +275,6 @@ namespace Kvadratu_rekursija
 
             DrawSquareFirstCycle(--y, startPosY, startPosX, offset, l, size, t);
         }
-
 
         static void DrawSquareSecondCycle(int y, int x, int startPosY, int startPosX, int offset, int l, int size, byte[] t)
         {
@@ -283,7 +292,6 @@ namespace Kvadratu_rekursija
             DrawSquareSecondCycle(y, --x, startPosY, startPosX, offset, l, size, t);
         }
 
-        // nuo pav dydzio ziureti laika ir ivykdytas kodo eilutes (su globaliu kintamuoju apsiskaiciuoti) taip pat ir su gyliu.
         // liūte neliūdėk
     }
 }
